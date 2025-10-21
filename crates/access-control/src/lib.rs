@@ -45,16 +45,24 @@ pub trait UserWriteableBackendHandler: UserReadableBackendHandler {
 }
 
 #[async_trait]
-pub trait AdminBackendHandler:
+pub trait UserManagerBackendHandler:
     UserWriteableBackendHandler
     + ReadonlyBackendHandler
-    + UserWriteableBackendHandler
     + SchemaBackendHandler
 {
     async fn create_user(&self, request: CreateUserRequest) -> Result<()>;
     async fn delete_user(&self, user_id: &UserId) -> Result<()>;
     async fn add_user_to_group(&self, user_id: &UserId, group_id: GroupId) -> Result<()>;
     async fn remove_user_from_group(&self, user_id: &UserId, group_id: GroupId) -> Result<()>;
+}
+
+#[async_trait]
+pub trait AdminBackendHandler:
+    UserManagerBackendHandler
+    + UserWriteableBackendHandler
+    + ReadonlyBackendHandler
+    + SchemaBackendHandler
+{
     async fn update_group(&self, request: UpdateGroupRequest) -> Result<()>;
     async fn create_group(&self, request: CreateGroupRequest) -> Result<GroupId>;
     async fn delete_group(&self, group_id: GroupId) -> Result<()>;
@@ -106,8 +114,9 @@ impl<Handler: BackendHandler> UserWriteableBackendHandler for Handler {
         <Handler as UserBackendHandler>::update_user(self, request).await
     }
 }
+
 #[async_trait]
-impl<Handler: BackendHandler> AdminBackendHandler for Handler {
+impl<Handler: BackendHandler> UserManagerBackendHandler for Handler {
     async fn create_user(&self, request: CreateUserRequest) -> Result<()> {
         <Handler as UserBackendHandler>::create_user(self, request).await
     }
@@ -120,6 +129,10 @@ impl<Handler: BackendHandler> AdminBackendHandler for Handler {
     async fn remove_user_from_group(&self, user_id: &UserId, group_id: GroupId) -> Result<()> {
         <Handler as UserBackendHandler>::remove_user_from_group(self, user_id, group_id).await
     }
+}
+
+#[async_trait]
+impl<Handler: BackendHandler> AdminBackendHandler for Handler {
     async fn update_group(&self, request: UpdateGroupRequest) -> Result<()> {
         <Handler as GroupBackendHandler>::update_group(self, request).await
     }
@@ -209,6 +222,15 @@ impl<Handler: BackendHandler> AccessControlledBackendHandler<Handler> {
             .then_some(&self.handler)
     }
 
+    pub fn get_user_manager_handler(
+        &self,
+        validation_result: &ValidationResults,
+    ) -> Option<&(impl UserManagerBackendHandler + use<Handler>)> {
+        validation_result
+            .is_user_manager()
+            .then_some(&self.handler)
+    }
+
     pub fn get_readable_handler(
         &self,
         validation_result: &ValidationResults,
@@ -255,6 +277,8 @@ impl<Handler: BackendHandler> AccessControlledBackendHandler<Handler> {
                 Permission::PasswordManager
             } else if is_in_group("lldap_strict_readonly".into()) {
                 Permission::Readonly
+            } else if is_in_group("lldap_user_manager".into()) {
+                Permission::UserManager
             } else {
                 Permission::Regular
             },

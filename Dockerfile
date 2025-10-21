@@ -18,7 +18,8 @@ WORKDIR /app
 
 RUN set -x \
     # Install build tools
-    && RUSTFLAGS=-Ctarget-feature=-crt-static cargo install wasm-pack cargo-chef \
+    && RUSTFLAGS=-Ctarget-feature=-crt-static cargo install cargo-chef \
+    && cargo install wasm-pack --version 0.12.1 \
     && rustup target add wasm32-unknown-unknown
 
 # Prepare the dependency list.
