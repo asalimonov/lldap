@@ -60,7 +60,6 @@ impl ValidationResults {
         user_is_user_manager: bool,
     ) -> bool {
         self.permission == Permission::Admin
-            || (self.permission == Permission::PasswordManager && !user_is_admin)
             || (self.permission == Permission::PasswordManager
                 && !user_is_admin
                 && !user_is_user_manager)
