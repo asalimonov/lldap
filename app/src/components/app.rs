@@ -65,7 +65,7 @@ impl Component for App {
                     error!(&e.to_string());
                     None
                 })
-                .and_then(|u| {
+                .map(|u| {
                     let is_admin = get_cookie("is_admin")
                         .ok()
                         .flatten()
@@ -76,7 +76,7 @@ impl Component for App {
                         .flatten()
                         .map(|s| s == "true")
                         .unwrap_or(false);
-                    Some((u, is_admin, is_user_manager))
+                    (u, is_admin, is_user_manager)
                 }),
             redirect_to: Self::get_redirect_route(ctx),
             password_reset_enabled: None,

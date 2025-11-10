@@ -53,11 +53,19 @@ impl ValidationResults {
     }
 
     #[must_use]
-    pub fn can_change_password(&self, user: &UserId, user_is_admin: bool, user_is_user_manager: bool) -> bool {
+    pub fn can_change_password(
+        &self,
+        user: &UserId,
+        user_is_admin: bool,
+        user_is_user_manager: bool,
+    ) -> bool {
         self.permission == Permission::Admin
-            || (self.permission == Permission::PasswordManager && !user_is_admin)
-            || (self.permission == Permission::PasswordManager && !user_is_admin && !user_is_user_manager)
-            || (self.permission == Permission::UserManager && !user_is_admin && !user_is_user_manager)
+            || (self.permission == Permission::PasswordManager
+                && !user_is_admin
+                && !user_is_user_manager)
+            || (self.permission == Permission::UserManager
+                && !user_is_admin
+                && !user_is_user_manager)
             || &self.user == user
     }
 

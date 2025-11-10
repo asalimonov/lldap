@@ -480,10 +480,7 @@ where
         .map_err(|e| TcpError::BadRequest(format!("{e:#?}")))?
         .into_inner();
     let user_id = &registration_start_request.username;
-    let user_groups = data
-        .get_readonly_handler()
-        .get_user_groups(user_id)
-        .await?;
+    let user_groups = data.get_readonly_handler().get_user_groups(user_id).await?;
     let user_is_admin = user_groups
         .iter()
         .any(|g| g.display_name == "lldap_admin".into());

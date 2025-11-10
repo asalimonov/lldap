@@ -44,11 +44,8 @@ pub trait UserWriteableBackendHandler: UserReadableBackendHandler {
     async fn update_user(&self, request: UpdateUserRequest) -> Result<()>;
 }
 
-
 #[async_trait]
-pub trait UserManagerBackendHandler: UserWriteableBackendHandler
-    + ReadonlyBackendHandler
-{
+pub trait UserManagerBackendHandler: UserWriteableBackendHandler + ReadonlyBackendHandler {
     async fn create_user(&self, request: CreateUserRequest) -> Result<()>;
     async fn delete_user(&self, user_id: &UserId) -> Result<()>;
     async fn add_user_to_group(&self, user_id: &UserId, group_id: GroupId) -> Result<()>;
@@ -56,10 +53,7 @@ pub trait UserManagerBackendHandler: UserWriteableBackendHandler
 }
 
 #[async_trait]
-pub trait AdminBackendHandler:
-    UserManagerBackendHandler
-    + SchemaBackendHandler
-{
+pub trait AdminBackendHandler: UserManagerBackendHandler + SchemaBackendHandler {
     async fn update_group(&self, request: UpdateGroupRequest) -> Result<()>;
     async fn create_group(&self, request: CreateGroupRequest) -> Result<GroupId>;
     async fn delete_group(&self, group_id: GroupId) -> Result<()>;
@@ -231,9 +225,7 @@ impl<Handler: BackendHandler> AccessControlledBackendHandler<Handler> {
         &self,
         validation_result: &ValidationResults,
     ) -> Option<&(impl UserManagerBackendHandler + use<Handler>)> {
-        validation_result
-            .is_user_manager()
-            .then_some(&self.handler)
+        validation_result.is_user_manager().then_some(&self.handler)
     }
 
     pub fn get_user_restricted_lister_handler(

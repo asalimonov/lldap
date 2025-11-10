@@ -85,8 +85,12 @@ fn set_cookies_from_jwt(response: login::ServerLoginResponse) -> Result<(String,
         .context("Error setting user_id cookie")?;
     set_cookie("is_admin", &is_admin.to_string(), &jwt_claims.exp)
         .context("Error setting is_admin cookie")?;
-    set_cookie("is_user_manager", &is_user_manager.to_string(), &jwt_claims.exp)
-        .context("Error setting is_user_manager cookie")?;
+    set_cookie(
+        "is_user_manager",
+        &is_user_manager.to_string(),
+        &jwt_claims.exp,
+    )
+    .context("Error setting is_user_manager cookie")?;
     Ok((jwt_claims.user.clone(), is_admin, is_user_manager))
 }
 
@@ -132,7 +136,9 @@ impl HostService {
         .await
     }
 
-    pub async fn login_finish(request: login::ClientLoginFinishRequest) -> Result<(String, bool, bool)> {
+    pub async fn login_finish(
+        request: login::ClientLoginFinishRequest,
+    ) -> Result<(String, bool, bool)> {
         call_server_json_with_error_message::<login::ServerLoginResponse, _>(
             &(base_url() + "/auth/opaque/login/finish"),
             RequestType::Post(request),
