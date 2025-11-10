@@ -36,8 +36,11 @@ impl<Handler: BackendHandler> Context<Handler> {
         self.handler.get_admin_handler(&self.validation_result)
     }
 
-    pub fn get_user_manager_handler(&self) -> Option<&(impl UserManagerBackendHandler + use<Handler>)> {
-        self.handler.get_user_manager_handler(&self.validation_result)
+    pub fn get_user_manager_handler(
+        &self,
+    ) -> Option<&(impl UserManagerBackendHandler + use<Handler>)> {
+        self.handler
+            .get_user_manager_handler(&self.validation_result)
     }
 
     pub fn get_readonly_handler(&self) -> Option<&(impl ReadonlyBackendHandler + use<Handler>)> {
